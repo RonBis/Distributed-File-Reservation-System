@@ -1,6 +1,4 @@
-package application;
-
-import application.resource.Resource;
+package application.resource;
 
 public class DesignFile extends Resource {
 

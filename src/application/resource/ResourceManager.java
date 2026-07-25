@@ -1,6 +1,5 @@
 package application.resource;
 
-import application.DesignFile;
 import application.Message;
 import comm.Transport;
 import util.Log;
