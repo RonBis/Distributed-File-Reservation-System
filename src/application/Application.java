@@ -3,10 +3,7 @@ package application;
 import util.FileReader;
 
 import java.io.IOException;
-import java.util.Arrays;
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
+import java.util.*;
 
 /// Connectivity: General graph topology<br><br>
 /// Site1: {2,4}<br>
@@ -16,7 +13,7 @@ import java.util.Map;
 /// Site5: {3,4}
 public class Application {
 
-    public static void main(String[] args) {
+    static void main(String[] args) {
         if (args.length < 1) {
             System.err.println("Site argument is not provided!");
             System.exit(1);
@@ -36,13 +33,12 @@ public class Application {
 
             new Site(siteConf, globalDesignFileTable);
         } catch (IOException e) {
-            e.printStackTrace();
-            System.err.println("Failed to start site! Exiting");
+            System.err.println("Failed to start site! Exiting\n" + e);
             System.exit(2);
         }
     }
 
-    static SiteConfig readSiteConf(int siteId) throws IOException, NumberFormatException {
+    private static SiteConfig readSiteConf(int siteId) throws IOException, NumberFormatException {
         final List<String> lines = FileReader.getInstance().readLines("sites.conf");
 
         final Map<Integer, String> siteIdAddrMap = new HashMap<>();
@@ -60,8 +56,7 @@ public class Application {
             final int id = Integer.parseInt(args[0]);
             final String addr = args[1];
             final int[] peers = Arrays.stream(args[2].split(","))
-                    .mapToInt(Integer::parseInt)
-                    .toArray();
+                    .mapToInt(Integer::parseInt).toArray();
 
             siteIdAddrMap.put(id, addr);
             sitePeerIdsMap.put(id, peers);
@@ -71,10 +66,13 @@ public class Application {
             sitePeerIdAddrMap.put(peerId, siteIdAddrMap.get(peerId));
         }
 
-        return new SiteConfig(siteId, siteIdAddrMap.get(siteId), sitePeerIdAddrMap);
+        // Find next hops along the shortest path to a destination using BFS
+        final Map<Integer, Integer> nextHopMap =
+                calculateNextHopsAlongShortestPath(siteId, siteIdAddrMap.keySet(), sitePeerIdsMap);
+        return new SiteConfig(siteId, siteIdAddrMap.get(siteId), sitePeerIdAddrMap, nextHopMap);
     }
 
-    static Map<Integer, Integer> readResourceTable() throws IOException {
+    private static Map<Integer, Integer> readResourceTable() throws IOException {
         final List<String> lines = FileReader.getInstance().readLines("resources.txt");
 
         final Map<Integer, Integer> globalResourceTable = new HashMap<>();
@@ -92,5 +90,46 @@ public class Application {
             globalResourceTable.put(resourceId, siteId);
         }
         return globalResourceTable;
+    }
+
+    /// Find next hops along the shortest path to every destination using BFS
+    private static Map<Integer, Integer> calculateNextHopsAlongShortestPath(
+            int siteId,
+            Set<Integer> destinationIds,
+            Map<Integer, int[]> sitePeerIdsMap
+    ) {
+        final Map<Integer, Integer> nextHopMap = new HashMap<>();
+
+        final Queue<Integer> queue = new ArrayDeque<>();
+        final Set<Integer> visited = new HashSet<>();
+        final Map<Integer, Integer> parent = new HashMap<>();
+
+        queue.offer(siteId);
+        visited.add(siteId);
+        parent.put(siteId, -1);
+
+        while (!queue.isEmpty()) {
+            final int curr = queue.poll();
+            for (int neighbor : sitePeerIdsMap.get(curr)) {
+                if (visited.add(neighbor)) {
+                    parent.put(neighbor, curr);
+                    queue.offer(neighbor);
+                }
+            }
+        }
+
+        // Determine the first hop for every destination
+        for (int dest : destinationIds) {
+            if (dest == siteId) {
+                continue;
+            }
+            int node = dest;
+            // Walk up the BFS tree until we reach a direct neighbour of siteId
+            while (parent.get(node) != siteId) {
+                node = parent.get(node);
+            }
+            nextHopMap.put(dest, node);
+        }
+        return nextHopMap;
     }
 }

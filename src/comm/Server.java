@@ -1,6 +1,5 @@
 package comm;
 
-import application.Message;
 import util.Log;
 
 import java.io.IOException;
@@ -15,7 +14,7 @@ import java.util.logging.Logger;
 public class Server implements Runnable {
 
     private final ServerSocket serverSocket;
-    protected final BlockingQueue<Message> msgQ = new LinkedBlockingQueue<>(1000);
+    protected final BlockingQueue<AbstractMessage> msgQ = new LinkedBlockingQueue<>(1000);
 
     private static final Logger LOG = Log.getLogger(Server.class.getSimpleName());
 
@@ -44,9 +43,9 @@ public class Server implements Runnable {
         private final Socket socket;
         private ObjectInputStream in;
 
-        private final BlockingQueue<Message> msgQ;
+        private final BlockingQueue<AbstractMessage> msgQ;
 
-        public ClientHandler(Socket socket, BlockingQueue<Message> msgQ) {
+        public ClientHandler(Socket socket, BlockingQueue<AbstractMessage> msgQ) {
             this.socket = socket;
             this.msgQ = msgQ;
 
@@ -58,9 +57,9 @@ public class Server implements Runnable {
         }
 
         public void run() {
-            Message incoming;
+            AbstractMessage incoming;
             try {
-                while ((incoming = (Message) in.readObject()) != null) {
+                while ((incoming = (AbstractMessage) in.readObject()) != null) {
                     msgQ.put(incoming);
                 }
             } catch (ClassNotFoundException e) {
@@ -68,8 +67,8 @@ public class Server implements Runnable {
             } catch (IOException e) {
                 LOG.severe("Error reading input stream from client " + socket.getRemoteSocketAddress() + "\n" + e);
             } catch (InterruptedException e) {
+                Thread.currentThread().interrupt();
                 LOG.severe("Thread interrupted while waiting for Message Queue to free up space.\n" + e);
-            } finally {
                 try {
                     socket.close();
                 } catch (IOException ignored) {

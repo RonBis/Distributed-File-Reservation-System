@@ -1,4 +1,4 @@
-package application;
+package application.resource;
 
 abstract public class Resource {
 
@@ -17,9 +17,17 @@ abstract public class Resource {
         return lockedBySiteId;
     }
 
-    public void requestLock(int siteId) {
-        if (lockedBySiteId == null) {
+    public boolean isLocked() {
+        return lockedBySiteId != null;
+    }
+
+    /// @return boolean - If request was granted
+    public boolean requestLock(int siteId) {
+        if (!isLocked()) {
             lockedBySiteId = siteId;
+            return true;
+        } else {
+            return false;
         }
     }
 

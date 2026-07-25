@@ -1,6 +1,5 @@
 package comm;
 
-import application.Message;
 import util.Log;
 
 import java.io.IOException;
@@ -50,7 +49,7 @@ public class Client {
         return false;
     }
 
-    public synchronized void send(Message m) throws IOException {
+    public synchronized void send(AbstractMessage m) throws IOException {
         out.writeObject(m);
         out.flush();
     }
