@@ -1,0 +1,27 @@
+main                      INFO    Site 5 started
+Site 5 [Server Thread]    INFO    Server listening at /127.0.0.1:9005
+Site 5 [Client 127.0.0.1:9004 Thread] INFO    Connecting to 127.0.0.1:9004  ...
+Site 5 [Client 127.0.0.1:9003 Thread] INFO    Connecting to 127.0.0.1:9003  ...
+Site 5 [Client 127.0.0.1:9004 Thread] INFO    Connected to 127.0.0.1:9004
+Site 5 [Client 127.0.0.1:9003 Thread] INFO    Connected to 127.0.0.1:9003
+Site 5 [Message Listener Thread] INFO    Resource 11 granted by site 1
+Site 5 [Message Listener Thread] INFO    
+==================== Resource Manager ====================
+Public Label : 5
+Private Label: 5
+
+Waiting Sites: -
+
+Resources:
+  Resource 51   Holder: 4   Waiting: -
+  Resource 52   Holder: null Waiting: -
+
+==========================================================
+
+Site 5 [Message Listener Thread] INFO    Site 1 is waiting on me
+Site 5 [Message Listener Thread] INFO    Resource 51 is held by site 4
+Site 5 [Message Listener Thread] INFO    (BLOCK RULE) Before: u/v = 5/5
+             After: u/v = 10/10
+Site 5 [Message Listener Thread] INFO    Transmitting updated public label 10 to waiting sites: [1]
+Site 5 [Message Listener Thread] SEVERE  Deadlock detected at site 5-4
+Thread-0                  INFO    Shutting down...

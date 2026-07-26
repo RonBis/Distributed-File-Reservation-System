@@ -1,5 +1,6 @@
 package comm;
 
+import comm.message.AbstractMessage;
 import util.Log;
 
 import java.io.IOException;
@@ -7,6 +8,7 @@ import java.io.ObjectInputStream;
 import java.net.InetAddress;
 import java.net.ServerSocket;
 import java.net.Socket;
+import java.net.SocketException;
 import java.util.concurrent.BlockingQueue;
 import java.util.concurrent.LinkedBlockingQueue;
 import java.util.logging.Logger;
@@ -16,6 +18,8 @@ public class Server implements Runnable {
     private final ServerSocket serverSocket;
     protected final BlockingQueue<AbstractMessage> msgQ = new LinkedBlockingQueue<>(1000);
 
+    private volatile boolean shuttingDown = false;
+
     private static final Logger LOG = Log.getLogger(Server.class.getSimpleName());
 
     public Server(InetAddress bindAddr, int port) throws IOException {
@@ -24,10 +28,15 @@ public class Server implements Runnable {
 
     public void run() {
         LOG.info("Server listening at " + serverSocket.getLocalSocketAddress());
-        while (true) {
+        while (!serverSocket.isClosed()) {
             try {
                 final Socket clientSocket = serverSocket.accept();
                 new ClientHandler(clientSocket, msgQ).start();
+            } catch (SocketException e) {
+                if (shuttingDown) {
+                    break;
+                }
+                throw new RuntimeException(e);
             } catch (Exception e) {
                 throw new RuntimeException(e);
             }
@@ -35,6 +44,7 @@ public class Server implements Runnable {
     }
 
     public void close() throws IOException {
+        shuttingDown = true;
         serverSocket.close();
     }
 

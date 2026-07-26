@@ -2,6 +2,7 @@ package comm;
 
 import application.Site;
 import application.SiteConfig;
+import comm.message.AbstractMessage;
 import util.Log;
 
 import java.io.IOException;
@@ -23,6 +24,7 @@ public class Transport {
 
     private final CountDownLatch peersConnected;
     private Server server;
+    private final Thread messageListenerThread;
 
     private static final Logger LOG = Log.getLogger(Transport.class.getSimpleName());
 
@@ -60,7 +62,7 @@ public class Transport {
             // Connect with direct peers
             tryConnectPeers();
 
-            final Thread messageListenerThread = new Thread(
+            messageListenerThread = new Thread(
                     this::listenMessages,
                     "Site " + site.getId() + " [Message Listener Thread]");
 
@@ -94,12 +96,27 @@ public class Transport {
         }
     }
 
+    public void postLocalMessage(AbstractMessage m) {
+        try {
+            server.msgQ.put(m);
+        } catch (InterruptedException e) {
+            Thread.currentThread().interrupt();
+            throw new RuntimeException("Interrupted while posting local message.", e);
+        }
+    }
+
     public void send(AbstractMessage m) {
         try {
+            if (m.getRecipient() == m.getSender()) {
+                postLocalMessage(m);
+                return;
+            }
+
             // Wait for all peers to connect
             peersConnected.await();
 
             final int nextHopId = nextHopMap.get(m.getRecipient());
+
             final String nextHopAddr = peerIdAddrMap.get(nextHopId);
             final Client client = peerAddrClientMap.get(nextHopAddr);
             if (client == null) {
@@ -130,6 +147,20 @@ public class Transport {
                     peersConnected.countDown();
                 }
             }, "Site " + site.getId() + " [Client " + peer.getValue() + " Thread]").start();
+        }
+    }
+
+    public void closeAllConnections() {
+        try {
+            server.close(); // Stop server socket
+            // Close all client sockets
+            for (Client c : peerAddrClientMap.values()) {
+                c.close();
+            }
+
+            messageListenerThread.interrupt();
+        } catch (IOException e) {
+            throw new RuntimeException(e);
         }
     }
 }

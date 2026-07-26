@@ -1,6 +1,7 @@
 package application;
 
 import util.FileReader;
+import util.Log;
 
 import java.io.IOException;
 import java.util.*;
@@ -27,7 +28,11 @@ public class Application {
             System.exit(1);
         }
 
+
         try {
+            // Initialize Logger
+            Log.initialize(siteId);
+
             final SiteConfig siteConf = readSiteConf(siteId);
             final Map<Integer, Integer> globalDesignFileTable = readResourceTable();
 

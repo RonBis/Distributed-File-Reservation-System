@@ -1,9 +1,9 @@
-package comm;
+package comm.message;
 
 import java.io.Serial;
 import java.io.Serializable;
 
-public abstract class AbstractMessage implements Serializable {
+public abstract sealed class AbstractMessage implements Serializable permits LocalMessage, ResourceMessage {
 
     @Serial
     private static final long serialVersionUID = 1L;

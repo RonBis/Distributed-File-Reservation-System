@@ -1,0 +1,34 @@
+main                      INFO    Site 4 started
+Site 4 [Server Thread]    INFO    Server listening at /127.0.0.1:9004
+Site 4 [Client 127.0.0.1:9005 Thread] INFO    Connecting to 127.0.0.1:9005  ...
+Site 4 [Client 127.0.0.1:9001 Thread] INFO    Connecting to 127.0.0.1:9001  ...
+Site 4 [Client 127.0.0.1:9003 Thread] INFO    Connecting to 127.0.0.1:9003  ...
+Site 4 [Client 127.0.0.1:9001 Thread] INFO    Connected to 127.0.0.1:9001
+Site 4 [Client 127.0.0.1:9003 Thread] INFO    Connected to 127.0.0.1:9003
+Site 4 [Client 127.0.0.1:9005 Thread] WARNING Connection failed for 127.0.0.1:9005 (attempt 1/60): Connection refused
+Site 4 [Client 127.0.0.1:9005 Thread] INFO    Connecting to 127.0.0.1:9005  ...
+Site 4 [Client 127.0.0.1:9005 Thread] INFO    Connected to 127.0.0.1:9005
+Site 4 [Message Listener Thread] INFO    Resource 51 granted by site 5
+Site 4 [Message Listener Thread] INFO    
+==================== Resource Manager ====================
+Public Label : 4
+Private Label: 4
+
+Waiting Sites: -
+
+Resources:
+  Resource 41   Holder: 3   Waiting: -
+  Resource 42   Holder: null Waiting: -
+
+==========================================================
+
+Site 4 [Message Listener Thread] INFO    Resource 41 is held by site 3
+Site 4 [Message Listener Thread] INFO    (BLOCK RULE) Before: u/v = 4/4
+             After: u/v = 9/9
+Site 4 [Message Listener Thread] INFO    Transmitting updated public label 9 to waiting sites: []
+Site 4 [Message Listener Thread] INFO    Site 5 is waiting on me
+Site 4 [Message Listener Thread] INFO    (TRANSMIT RULE) Before: u/v = 9/9
+             After: u/v = 10/9
+Thread-3                  SEVERE  Error reading input stream from client /127.0.0.1:46404
+java.io.EOFException
+Thread-0                  INFO    Shutting down...

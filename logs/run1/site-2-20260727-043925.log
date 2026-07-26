@@ -1,0 +1,30 @@
+main                      INFO    Site 2 started
+Site 2 [Server Thread]    INFO    Server listening at /127.0.0.1:9002
+Site 2 [Client 127.0.0.1:9001 Thread] INFO    Connecting to 127.0.0.1:9001  ...
+Site 2 [Client 127.0.0.1:9003 Thread] INFO    Connecting to 127.0.0.1:9003  ...
+Site 2 [Client 127.0.0.1:9001 Thread] INFO    Connected to 127.0.0.1:9001
+Site 2 [Client 127.0.0.1:9003 Thread] WARNING Connection failed for 127.0.0.1:9003 (attempt 1/60): Connection refused
+Site 2 [Client 127.0.0.1:9003 Thread] INFO    Connecting to 127.0.0.1:9003  ...
+Site 2 [Client 127.0.0.1:9003 Thread] INFO    Connected to 127.0.0.1:9003
+Site 2 [Message Listener Thread] INFO    Resource 31 granted by site 3
+Site 2 [Message Listener Thread] INFO    
+==================== Resource Manager ====================
+Public Label : 2
+Private Label: 2
+
+Waiting Sites: -
+
+Resources:
+  Resource 21   Holder: 1   Waiting: -
+  Resource 22   Holder: null Waiting: -
+
+==========================================================
+
+Site 2 [Message Listener Thread] INFO    Resource 21 is held by site 1
+Site 2 [Message Listener Thread] INFO    (BLOCK RULE) Before: u/v = 2/2
+             After: u/v = 7/7
+Site 2 [Message Listener Thread] INFO    Transmitting updated public label 7 to waiting sites: []
+Site 2 [Message Listener Thread] INFO    Site 3 is waiting on me
+Site 2 [Message Listener Thread] INFO    (TRANSMIT RULE) Before: u/v = 7/7
+             After: u/v = 10/7
+Thread-0                  INFO    Shutting down...

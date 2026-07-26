@@ -1,0 +1,34 @@
+main                      INFO    Site 1 started
+Site 1 [Server Thread]    INFO    Server listening at /127.0.0.1:9001
+Site 1 [Client 127.0.0.1:9004 Thread] INFO    Connecting to 127.0.0.1:9004  ...
+Site 1 [Client 127.0.0.1:9002 Thread] INFO    Connecting to 127.0.0.1:9002  ...
+Site 1 [Client 127.0.0.1:9004 Thread] WARNING Connection failed for 127.0.0.1:9004 (attempt 1/60): Connection refused
+Site 1 [Client 127.0.0.1:9002 Thread] WARNING Connection failed for 127.0.0.1:9002 (attempt 1/60): Connection refused
+Site 1 [Client 127.0.0.1:9002 Thread] INFO    Connecting to 127.0.0.1:9002  ...
+Site 1 [Client 127.0.0.1:9004 Thread] INFO    Connecting to 127.0.0.1:9004  ...
+Site 1 [Client 127.0.0.1:9004 Thread] WARNING Connection failed for 127.0.0.1:9004 (attempt 2/60): Connection refused
+Site 1 [Client 127.0.0.1:9002 Thread] INFO    Connected to 127.0.0.1:9002
+Site 1 [Client 127.0.0.1:9004 Thread] INFO    Connecting to 127.0.0.1:9004  ...
+Site 1 [Client 127.0.0.1:9004 Thread] INFO    Connected to 127.0.0.1:9004
+Site 1 [Message Listener Thread] INFO    Resource 21 granted by site 2
+Site 1 [Message Listener Thread] INFO    
+==================== Resource Manager ====================
+Public Label : 1
+Private Label: 1
+
+Waiting Sites: -
+
+Resources:
+  Resource 11   Holder: 5   Waiting: -
+  Resource 12   Holder: null Waiting: -
+
+==========================================================
+
+Site 1 [Message Listener Thread] INFO    Resource 11 is held by site 5
+Site 1 [Message Listener Thread] INFO    (BLOCK RULE) Before: u/v = 1/1
+             After: u/v = 6/6
+Site 1 [Message Listener Thread] INFO    Transmitting updated public label 6 to waiting sites: []
+Site 1 [Message Listener Thread] INFO    Site 2 is waiting on me
+Site 1 [Message Listener Thread] INFO    (TRANSMIT RULE) Before: u/v = 6/6
+             After: u/v = 10/6
+Thread-0                  INFO    Shutting down...
