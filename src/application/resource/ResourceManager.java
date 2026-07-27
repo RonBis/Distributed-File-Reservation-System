@@ -15,7 +15,6 @@ public class ResourceManager {
 
     private final int siteId;
 
-
     /// Map: Resource id => ID of the site that has the resource
     private final Map<Integer, Integer> globalResourceTable;
     /// Map: Resource id => Resource object
@@ -214,7 +213,7 @@ public class ResourceManager {
         publicLabel = privateLabel = Math.max(this.publicLabel, msg.getPublicLabel()) + 1;
 
         LOG.info(String.format(
-                "(BLOCK RULE) Before: u/v = %d/%d\n" + "             " + "After: u/v = %d/%d",
+                "(BLOCK RULE) Before: u/v = %d/%d \t After: u/v = %d/%d",
                 oldPublicLabel, oldPrivateLabel, publicLabel, privateLabel)
         );
 
@@ -245,10 +244,9 @@ public class ResourceManager {
             publicLabel = msg.getPublicLabel();
 
             LOG.info(String.format(
-                    "(TRANSMIT RULE) Before: u/v = %d/%d\n" + "             " + "After: u/v = %d/%d",
+                    "(TRANSMIT RULE) Before: u/v = %d/%d \t After: u/v = %d/%d",
                     oldPublicLabel, oldPrivateLabel, publicLabel, privateLabel)
             );
-
 
             // Propagate TRANSMIT message
             for (int waitingSite : waitingSites) {
@@ -262,7 +260,7 @@ public class ResourceManager {
 
         // Detect rule is evaluated after processing every transmit message.
         if (publicLabel == privateLabel) {
-            LOG.severe("Deadlock detected at site " + siteId + "-" + msg.getSender());
+            LOG.severe("Deadlock detected at sites " + siteId + " --- " + msg.getSender());
             System.exit(99);
         }
     }

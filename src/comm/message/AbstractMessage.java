@@ -2,6 +2,8 @@ package comm.message;
 
 import java.io.Serial;
 import java.io.Serializable;
+import java.lang.reflect.Field;
+import java.lang.reflect.Modifier;
 
 public abstract sealed class AbstractMessage implements Serializable permits LocalMessage, ResourceMessage {
 
@@ -25,9 +27,29 @@ public abstract sealed class AbstractMessage implements Serializable permits Loc
 
     @Override
     public String toString() {
-        return "<" + getClass().getSimpleName() +
-                ", sender: " + sender +
-                ", recipient: " + recipient +
-                ">";
+        StringBuilder sb = new StringBuilder();
+
+        sb.append('<')
+                .append(getClass().getSimpleName())
+                .append(", sender: ").append(sender)
+                .append(", recipient: ").append(recipient);
+
+        for (Field field : getClass().getDeclaredFields()) {
+            if (Modifier.isStatic(field.getModifiers()))
+                continue;
+
+            field.setAccessible(true);
+
+            try {
+                sb.append(", ")
+                        .append(field.getName())
+                        .append(": ")
+                        .append(field.get(this));
+            } catch (IllegalAccessException ignored) {
+            }
+        }
+
+        sb.append('>');
+        return sb.toString();
     }
 }
