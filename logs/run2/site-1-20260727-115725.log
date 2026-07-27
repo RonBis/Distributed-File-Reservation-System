@@ -1,0 +1,55 @@
+main                      INFO    Site 1 started
+Site 1 [Server Thread]    INFO    Server listening at /127.0.0.1:9001
+Site 1 [Client 127.0.0.1:9004 Thread] INFO    Connecting to 127.0.0.1:9004  ...
+Site 1 [Client 127.0.0.1:9002 Thread] INFO    Connecting to 127.0.0.1:9002  ...
+Site 1 [Client 127.0.0.1:9004 Thread] INFO    Connected to 127.0.0.1:9004
+Site 1 [Client 127.0.0.1:9002 Thread] WARNING Connection failed for 127.0.0.1:9002 (attempt 1/60): Connection refused
+Site 1 [Client 127.0.0.1:9002 Thread] INFO    Connecting to 127.0.0.1:9002  ...
+Site 1 [Client 127.0.0.1:9002 Thread] INFO    Connected to 127.0.0.1:9002
+Site 1 [Message Listener Thread] INFO    LocalCommand: <ReqResourceLockMsg, sender: 1, recipient: 1, resourceId: 21>
+Site 1 [Message Listener Thread] INFO    RemoteMessage: <ResourceLockAckMsg, sender: 2, recipient: 1, resourceId: 21, isGranted: true, holderSiteId: 1, remainingWaiters: []>
+Site 1 [Message Listener Thread] INFO    Resource 21 granted by site 2
+Site 1 [Message Listener Thread] INFO    RemoteMessage: <ReqResourceLockMsg, sender: 3, recipient: 1, resourceId: 11>
+Site 1 [Message Listener Thread] INFO    LocalCommand: <PrintStatusMsg, sender: 1, recipient: 1>
+Site 1 [Message Listener Thread] INFO    
+==================== Resource Manager ====================
+Public Label : 1
+Private Label: 1
+
+Waiting Sites: -
+
+Resources:
+  Resource 11   Holder: 3   Waiting: -
+  Resource 12   Holder: null Waiting: -
+
+==========================================================
+
+Site 1 [Message Listener Thread] INFO    LocalCommand: <ReqResourceLockMsg, sender: 1, recipient: 1, resourceId: 31>
+Site 1 [Message Listener Thread] INFO    RemoteMessage: <ResourceLockAckMsg, sender: 3, recipient: 1, resourceId: 31, isGranted: false, holderSiteId: 2, remainingWaiters: []>
+Site 1 [Message Listener Thread] INFO    Resource 31 is held by site 2
+Site 1 [Message Listener Thread] INFO    RemoteMessage: <PublicLabelQueryReplyMsg, sender: 2, recipient: 1, publicLabel: 2>
+Site 1 [Message Listener Thread] INFO    (BLOCK RULE) Before: u/v = 1/1 	 After: u/v = 3/3
+Site 1 [Message Listener Thread] INFO    RemoteMessage: <ReqResourceLockMsg, sender: 2, recipient: 1, resourceId: 11>
+Site 1 [Message Listener Thread] INFO    RemoteMessage: <PublicLabelTransmitMsg, sender: 2, recipient: 1, publicLabel: 4>
+Site 1 [Message Listener Thread] INFO    (TRANSMIT RULE) Before: u/v = 3/3 	 After: u/v = 4/3
+Site 1 [Message Listener Thread] INFO    LocalCommand: <PrintStatusMsg, sender: 1, recipient: 1>
+Site 1 [Message Listener Thread] INFO    
+==================== Resource Manager ====================
+Public Label : 4
+Private Label: 3
+
+Waiting Sites: -
+
+Resources:
+  Resource 11   Holder: 3   Waiting: [2]
+  Resource 12   Holder: null Waiting: -
+
+==========================================================
+
+Site 1 [Message Listener Thread] INFO    RemoteMessage: <AddWaitingSiteMsg, sender: 2, recipient: 1, waitingSiteId: 3>
+Site 1 [Message Listener Thread] INFO    Site 3 is waiting on me
+Site 1 [Message Listener Thread] INFO    RemoteMessage: <PublicLabelQueryMsg, sender: 3, recipient: 1>
+Site 1 [Message Listener Thread] INFO    RemoteMessage: <PublicLabelTransmitMsg, sender: 2, recipient: 1, publicLabel: 5>
+Site 1 [Message Listener Thread] INFO    (TRANSMIT RULE) Before: u/v = 4/3 	 After: u/v = 5/3
+Site 1 [Message Listener Thread] INFO    Transmitting updated public label 5 to waiting sites: [3]
+Site 1 [Shutdown hook]    INFO    Shutting down...

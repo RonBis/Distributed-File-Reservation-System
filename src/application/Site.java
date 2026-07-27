@@ -46,7 +46,11 @@ public class Site implements Runnable, MessageReceiver {
 
     @Override
     public void onMessage(AbstractMessage msg) {
-        LOG.info(msg.toString());
+        if (msg instanceof LocalMessage) {
+            LOG.info("LocalCommand: " + msg);
+        } else {
+            LOG.info("RemoteMessage: " + msg);
+        }
         switch (msg) {
             case ResourceMessage resourceMessage -> {
                 switch (resourceMessage) {

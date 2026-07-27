@@ -1,0 +1,56 @@
+main                      INFO    Site 2 started
+Site 2 [Server Thread]    INFO    Server listening at /127.0.0.1:9002
+Site 2 [Client 127.0.0.1:9001 Thread] INFO    Connecting to 127.0.0.1:9001  ...
+Site 2 [Client 127.0.0.1:9003 Thread] INFO    Connecting to 127.0.0.1:9003  ...
+Site 2 [Client 127.0.0.1:9001 Thread] INFO    Connected to 127.0.0.1:9001
+Site 2 [Client 127.0.0.1:9003 Thread] WARNING Connection failed for 127.0.0.1:9003 (attempt 1/60): Connection refused
+Site 2 [Client 127.0.0.1:9003 Thread] INFO    Connecting to 127.0.0.1:9003  ...
+Site 2 [Client 127.0.0.1:9003 Thread] INFO    Connected to 127.0.0.1:9003
+Site 2 [Message Listener Thread] INFO    RemoteMessage: <ReqResourceLockMsg, sender: 1, recipient: 2, resourceId: 21>
+Site 2 [Message Listener Thread] INFO    LocalCommand: <ReqResourceLockMsg, sender: 2, recipient: 2, resourceId: 31>
+Site 2 [Message Listener Thread] INFO    RemoteMessage: <ResourceLockAckMsg, sender: 3, recipient: 2, resourceId: 31, isGranted: true, holderSiteId: 2, remainingWaiters: []>
+Site 2 [Message Listener Thread] INFO    Resource 31 granted by site 3
+Site 2 [Message Listener Thread] INFO    LocalCommand: <PrintStatusMsg, sender: 2, recipient: 2>
+Site 2 [Message Listener Thread] INFO    
+==================== Resource Manager ====================
+Public Label : 2
+Private Label: 2
+
+Waiting Sites: -
+
+Resources:
+  Resource 21   Holder: 1   Waiting: -
+  Resource 22   Holder: null Waiting: -
+
+==========================================================
+
+Site 2 [Message Listener Thread] INFO    RemoteMessage: <AddWaitingSiteMsg, sender: 3, recipient: 2, waitingSiteId: 1>
+Site 2 [Message Listener Thread] INFO    Site 1 is waiting on me
+Site 2 [Message Listener Thread] INFO    RemoteMessage: <PublicLabelQueryMsg, sender: 1, recipient: 2>
+Site 2 [Message Listener Thread] INFO    LocalCommand: <PrintStatusMsg, sender: 2, recipient: 2>
+Site 2 [Message Listener Thread] INFO    
+==================== Resource Manager ====================
+Public Label : 2
+Private Label: 2
+
+Waiting Sites: [1]
+
+Resources:
+  Resource 21   Holder: 1   Waiting: -
+  Resource 22   Holder: null Waiting: -
+
+==========================================================
+
+Site 2 [Message Listener Thread] INFO    LocalCommand: <ReqResourceLockMsg, sender: 2, recipient: 2, resourceId: 11>
+Site 2 [Message Listener Thread] INFO    RemoteMessage: <ResourceLockAckMsg, sender: 1, recipient: 2, resourceId: 11, isGranted: false, holderSiteId: 3, remainingWaiters: []>
+Site 2 [Message Listener Thread] INFO    Resource 11 is held by site 3
+Site 2 [Message Listener Thread] INFO    RemoteMessage: <PublicLabelQueryReplyMsg, sender: 3, recipient: 2, publicLabel: 3>
+Site 2 [Message Listener Thread] INFO    (BLOCK RULE) Before: u/v = 2/2 	 After: u/v = 4/4
+Site 2 [Message Listener Thread] INFO    Transmitting updated public label 4 to waiting sites: [1]
+Site 2 [Message Listener Thread] INFO    RemoteMessage: <ReqResourceLockMsg, sender: 3, recipient: 2, resourceId: 21>
+Site 2 [Message Listener Thread] INFO    RemoteMessage: <PublicLabelTransmitMsg, sender: 3, recipient: 2, publicLabel: 5>
+Site 2 [Message Listener Thread] INFO    (TRANSMIT RULE) Before: u/v = 4/4 	 After: u/v = 5/4
+Site 2 [Message Listener Thread] INFO    Transmitting updated public label 5 to waiting sites: [1]
+Thread-1                  SEVERE  Error reading input stream from client /127.0.0.1:53452
+java.io.EOFException
+Site 2 [Shutdown hook]    INFO    Shutting down...

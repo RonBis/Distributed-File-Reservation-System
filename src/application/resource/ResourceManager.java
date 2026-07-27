@@ -167,6 +167,7 @@ public class ResourceManager {
 
         if (next != null) {
             // Let the waiting site know that it has been granted the resource
+            // and clear local waitlist
             transport.send(new ResourceMessage.ResourceLockAckMsg(
                     siteId,
                     next,
@@ -175,6 +176,8 @@ public class ResourceManager {
                     null,
                     waitingSites)
             );
+            // TODO: remove this bug later
+            //  waitingSites.clear();
         }
     }
 
@@ -217,17 +220,19 @@ public class ResourceManager {
                 oldPublicLabel, oldPrivateLabel, publicLabel, privateLabel)
         );
 
-        // Now transmit this updated public label to whoever waiting for this site to release resource
-        LOG.info(String.format(
-                "Transmitting updated public label %d to waiting sites: %s",
-                publicLabel, waitingSites)
-        );
-        for (int waitingSite : waitingSites) {
-            transport.send(new ResourceMessage.PublicLabelTransmitMsg(
-                    siteId,
-                    waitingSite,
-                    publicLabel)
+        if (!waitingSites.isEmpty()) {
+            // Now transmit this updated public label to whoever waiting for this site to release resource
+            LOG.info(String.format(
+                    "Transmitting updated public label %d to waiting sites: %s",
+                    publicLabel, waitingSites)
             );
+            for (int waitingSite : waitingSites) {
+                transport.send(new ResourceMessage.PublicLabelTransmitMsg(
+                        siteId,
+                        waitingSite,
+                        publicLabel)
+                );
+            }
         }
     }
 
@@ -249,12 +254,18 @@ public class ResourceManager {
             );
 
             // Propagate TRANSMIT message
-            for (int waitingSite : waitingSites) {
-                transport.send(new ResourceMessage.PublicLabelTransmitMsg(
-                        siteId,
-                        waitingSite,
-                        publicLabel)
+            if (!waitingSites.isEmpty()) {
+                LOG.info(String.format(
+                        "Transmitting updated public label %d to waiting sites: %s",
+                        publicLabel, waitingSites)
                 );
+                for (int waitingSite : waitingSites) {
+                    transport.send(new ResourceMessage.PublicLabelTransmitMsg(
+                            siteId,
+                            waitingSite,
+                            publicLabel)
+                    );
+                }
             }
         }
 
