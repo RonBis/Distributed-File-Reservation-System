@@ -20,11 +20,10 @@ public class Site implements Runnable, MessageReceiver {
     private static final Logger LOG = Log.getLogger(Site.class.getSimpleName());
 
     public Site(SiteConfig conf, Map<Integer, Integer> globalDesignFileTable) {
-        // Register graceful shutdown hook, ie: close server before System.exit()
-
         this.id = conf.id();
-
         LOG.info("Site " + id + " started");
+
+        // Register graceful shutdown hook, ie: close server before System.exit()
         Runtime.getRuntime().addShutdownHook(
                 new Thread(this::shutdown, "Site " + id + " [Shutdown hook]"));
 

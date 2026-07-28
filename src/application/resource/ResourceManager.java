@@ -74,7 +74,7 @@ public class ResourceManager {
         if (resourceMap.isEmpty())
             return "  None";
 
-        StringBuilder sb = new StringBuilder();
+        final StringBuilder sb = new StringBuilder();
         resourceMap.forEach((resourceId, resource) -> sb.append("""
                   Resource %-4d Holder: %-3s Waiting: %s
                 """.formatted(

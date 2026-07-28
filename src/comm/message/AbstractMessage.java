@@ -5,7 +5,8 @@ import java.io.Serializable;
 import java.lang.reflect.Field;
 import java.lang.reflect.Modifier;
 
-public abstract sealed class AbstractMessage implements Serializable permits LocalMessage, ResourceMessage {
+public abstract sealed class AbstractMessage implements Serializable
+        permits LocalMessage, ResourceMessage {
 
     @Serial
     private static final long serialVersionUID = 1L;
@@ -27,12 +28,15 @@ public abstract sealed class AbstractMessage implements Serializable permits Loc
 
     @Override
     public String toString() {
-        StringBuilder sb = new StringBuilder();
+        final StringBuilder sb = new StringBuilder();
 
-        sb.append('<')
-                .append(getClass().getSimpleName())
-                .append(", sender: ").append(sender)
-                .append(", recipient: ").append(recipient);
+        sb.append("<").append(getClass().getSimpleName());
+        if (!(this instanceof LocalMessage)) {
+            sb
+                    .append(", sender: ").append(sender)
+                    .append(", recipient: ").append(recipient);
+        }
+
 
         for (Field field : getClass().getDeclaredFields()) {
             if (Modifier.isStatic(field.getModifiers()))
