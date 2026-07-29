@@ -4,12 +4,9 @@ import comm.Transport;
 import comm.message.ResourceMessage;
 import util.Log;
 
-import java.util.Collections;
-import java.util.HashMap;
-import java.util.Map;
-import java.util.Set;
-import java.util.concurrent.ConcurrentHashMap;
+import java.util.*;
 import java.util.logging.Logger;
+import java.util.stream.Collectors;
 
 public class ResourceManager {
 
@@ -21,9 +18,9 @@ public class ResourceManager {
     private final Map<Integer, Resource> resourceMap = new HashMap<>();
 
     // Public label and private labels to detect deadlock using Mitchell-Merritt algorithm
-    private int publicLabel, privateLabel;
+    private MitchellMerrittLabel publicLabel, privateLabel;
     /// Sites that are blocked on this site
-    private final Set<Integer> waitingSites = ConcurrentHashMap.newKeySet();
+    private final Map<Integer, Set<Integer>> waitingSitesByResource;
 
     private final Transport transport;
     private static final Logger LOG = Log.getLogger(ResourceManager.class.getSimpleName());
@@ -34,9 +31,12 @@ public class ResourceManager {
             Transport transport
     ) {
         this.siteId = siteId;
-        this.publicLabel = this.privateLabel = siteId;  // Ensures distinct public-private label pair for each site
+
+        // Ensures distinct public-private label pair for each site
+        this.publicLabel = this.privateLabel = new MitchellMerrittLabel(siteId, siteId);
         this.globalResourceTable = globalResourceTable;
 
+        this.waitingSitesByResource = new HashMap<>();
         this.transport = transport;
 
         initResources();
@@ -54,23 +54,35 @@ public class ResourceManager {
         LOG.info("""
                 
                 ==================== Resource Manager ====================
-                Public Label : %d
-                Private Label: %d
+                Public Label : %s
+                Private Label: %s
+                
+                Acquired Resources: %s
                 
                 Waiting Sites: %s
                 
-                Resources:
+                Own Resources:
                 %s
                 ==========================================================
                 """.formatted(
-                publicLabel,
-                privateLabel,
-                waitingSites.isEmpty() ? "-" : waitingSites,
-                formatResources()
+                publicLabel, privateLabel,
+                formatOwnedResourcesDisplay(),
+                waitingSitesByResource.isEmpty() ? "-" : waitingSitesByResource,
+                formatResourcesDisplay()
         ));
     }
 
-    private String formatResources() {
+    private String formatOwnedResourcesDisplay() {
+        return resourceMap.values().stream()
+                .filter(resource -> Objects.equals(resource.getHolder(), siteId))
+                .map(resource -> String.valueOf(resource.getId()))
+                .collect(Collectors.collectingAndThen(
+                        Collectors.joining(", "),
+                        s -> s.isEmpty() ? "-" : s
+                ));
+    }
+
+    private String formatResourcesDisplay() {
         if (resourceMap.isEmpty())
             return "  None";
 
@@ -79,7 +91,7 @@ public class ResourceManager {
                   Resource %-4d Holder: %-3s Waiting: %s
                 """.formatted(
                 resourceId,
-                resource.getLockedBySiteId(),
+                resource.getHolder(),
                 resource.getReqQ().isEmpty() ? "-" : resource.getReqQ()
         )));
         return sb.toString();
@@ -117,8 +129,9 @@ public class ResourceManager {
             // Send a message AddWaitingSite message to let the resource holder know another site is waiting for it
             transport.send(new ResourceMessage.AddWaitingSiteMsg(
                     siteId,
-                    resource.getLockedBySiteId(),
-                    msg.getSender())
+                    resource.getHolder(),
+                    msg.getSender(),
+                    resourceId)
             );
         }
 
@@ -128,116 +141,145 @@ public class ResourceManager {
                 requestingSiteId,
                 resourceId,
                 requestGranted,
-                resource.getLockedBySiteId(),
+                resource.getHolder(),
                 Collections.emptySet())
         );
     }
 
     public void handleResourceLockAckMsg(ResourceMessage.ResourceLockAckMsg msg) {
+        final int resourceId = msg.getResourceId();
+
         if (msg.isGranted()) {
-            LOG.info("Resource " + msg.getResourceId() + " granted by site " + msg.getSender());
+            LOG.info("Resource " + resourceId + " granted by site " + msg.getSender());
+
             // Update waiting sites list when a resource is granted later
-            waitingSites.addAll(msg.getRemainingWaiters());
+            waitingSitesByResource.computeIfAbsent(resourceId, _ -> new HashSet<>())
+                    .addAll(msg.getWaitersForResource());
             return;
         }
 
         // Resource is not granted: Ask holder site for its public id and apply block rule after getting reply
-        LOG.info("Resource " + msg.getResourceId() + " is held by site " + msg.getHolderSiteId());
+        LOG.info("Resource %d is in use by site %d. Querying site %d for public label."
+                .formatted(resourceId, msg.getHolderSiteId(), msg.getHolderSiteId()));
+
         transport.send(new ResourceMessage.PublicLabelQueryMsg(
                 siteId,
-                msg.getHolderSiteId())
+                msg.getHolderSiteId(),
+                resourceId)
         );
     }
 
     public void handleReqReleaseResourceMsg(ResourceMessage.ReqReleaseResourceMsg msg) {
+        final int resourceId = msg.getResourceId();
+
         Integer next;
         try {
-            next = resourceMap.get(msg.getResourceId()).releaseLock(msg.getSender());
-            LOG.info("Site " + msg.getSender() + " released lock on resource " + msg.getResourceId());
+            next = resourceMap.get(resourceId).releaseLock(msg.getSender());
+
+            LOG.info("Site " + msg.getSender() + " released lock on resource " + resourceId);
         } catch (IllegalStateException ignore) {
             return;
         }
 
         // Send ReleaseResourceACK to sender
+        LOG.info("Sending ResourceReleaseAck for resource %d to site %d"
+                .formatted(resourceId, msg.getSender()));
+
         transport.send(new ResourceMessage.ReleaseResourceAckMsg(
                 siteId,
                 msg.getSender(),
-                next)
+                resourceId)
         );
 
         if (next != null) {
-            // Let the waiting site know that it has been granted the resource
-            // and clear local waitlist
+            // Let the waiting site know that it has been granted the resource and clear local resource request queue.
+            // Waiting site list for a resource could be null at any point, so return an Empty Set to prevent
+            // NPE on Set.copyOf().
+            final Set<Integer> waiters = Set.copyOf(resourceMap.get(resourceId).getReqQ());
+
+            LOG.info("Sending ResourceLockAck for resource %d to waiting site %d with waiting sites: %s"
+                    .formatted(resourceId, next, waiters));
+
             transport.send(new ResourceMessage.ResourceLockAckMsg(
                     siteId,
                     next,
-                    msg.getResourceId(),
+                    resourceId,
                     true,
                     null,
-                    waitingSites)
+                    waiters)
             );
-            // TODO: remove this bug later
-            //  waitingSites.clear();
         }
     }
 
     public void handleReleaseResourceAckMsg(ResourceMessage.ReleaseResourceAckMsg msg) {
-        final Integer waitingSiteToBeRemoved = msg.getWaitingSiteToBeRemoved();
-        if (waitingSiteToBeRemoved != null) {
-            waitingSites.remove(waitingSiteToBeRemoved);
-            LOG.info(String.format(
-                    "Removed %d from local waiting site set; current=%s",
-                    waitingSiteToBeRemoved, waitingSites)
-            );
+        final int resourceId = msg.getResourceId();
+        final Set<Integer> waitingSitesToBeRemoved = waitingSitesByResource.get(resourceId);
+
+        if (waitingSitesToBeRemoved != null && !waitingSitesToBeRemoved.isEmpty()) {
+            waitingSitesToBeRemoved.clear();
+            LOG.info("Cleared local waiting list for resource: %d".formatted(resourceId));
         }
     }
 
     public void handleAddWaitingSiteMsg(ResourceMessage.AddWaitingSiteMsg msg) {
         LOG.info("Site " + msg.getWaitingSiteId() + " is waiting on me");
-        waitingSites.add(msg.getWaitingSiteId());
+
+        final int resourceId = msg.getResourceId();
+        // Add waiting site for the particular resource
+        waitingSitesByResource.computeIfAbsent(resourceId, _ -> new HashSet<>())
+                .add(msg.getWaitingSiteId());
     }
 
     public void handlePublicLabelQueryMsg(ResourceMessage.PublicLabelQueryMsg msg) {
         transport.send(new ResourceMessage.PublicLabelQueryReplyMsg(
                 siteId,
                 msg.getSender(),
-                publicLabel)
+                publicLabel,
+                msg.getResourceId())
         );
     }
 
-    /// This method is invoked whenever this site was denied a resource and have to wait for until it is available.
+    /// This method is invoked whenever this site was denied a resource and have to wait until it is available.
     public void handlePublicLabelQueryReplyMsg(ResourceMessage.PublicLabelQueryReplyMsg msg) {
-        final int oldPublicLabel = publicLabel, oldPrivateLabel = privateLabel;
+        final MitchellMerrittLabel oldPublicLabel = publicLabel, oldPrivateLabel = privateLabel;
 
         /*
          * Generate new public and private label according to BLOCK RULE:
          * u = v = max(u, blockerU) + 1
+         *
+         * This site's siteId is retained here in updated public/private label
+         * as BLOCK RULE is just concerned with updating the counter, not the label propagation
          */
-        publicLabel = privateLabel = Math.max(this.publicLabel, msg.getPublicLabel()) + 1;
+        publicLabel = privateLabel = new MitchellMerrittLabel(
+                Math.max(this.publicLabel.counter(), msg.getPublicLabel().counter()) + 1, siteId);
 
-        LOG.info(String.format(
-                "(BLOCK RULE) Before: u/v = %d/%d \t After: u/v = %d/%d",
-                oldPublicLabel, oldPrivateLabel, publicLabel, privateLabel)
-        );
+        LOG.info("(BLOCK RULE) Before: u/v = %s/%s \t After: u/v = %s/%s"
+                .formatted(oldPublicLabel, oldPrivateLabel, publicLabel, privateLabel));
 
-        if (!waitingSites.isEmpty()) {
-            // Now transmit this updated public label to whoever waiting for this site to release resource
-            LOG.info(String.format(
-                    "Transmitting updated public label %d to waiting sites: %s",
-                    publicLabel, waitingSites)
-            );
+        for (Map.Entry<Integer, Set<Integer>> waitersForResource : waitingSitesByResource.entrySet()) {
+            // Now TRANSMIT this updated public label to whoever waiting for this site to release resource
+            final int heldResourceId = waitersForResource.getKey();
+            final Set<Integer> waitingSites = waitersForResource.getValue();
+
+            if (waitingSites.isEmpty()) continue;
+
+            LOG.info("Transmitting updated public label %s to waiting sites: %s for resource: %d"
+                    .formatted(publicLabel, waitingSites, heldResourceId));
+
             for (int waitingSite : waitingSites) {
                 transport.send(new ResourceMessage.PublicLabelTransmitMsg(
                         siteId,
                         waitingSite,
-                        publicLabel)
+                        publicLabel,
+                        heldResourceId)
                 );
             }
         }
     }
 
     public void handlePublicLabelTransmitMsg(ResourceMessage.PublicLabelTransmitMsg msg) {
-        final int oldPublicLabel = publicLabel, oldPrivateLabel = privateLabel;
+        final MitchellMerrittLabel oldPublicLabel = publicLabel, oldPrivateLabel = privateLabel;
+        final MitchellMerrittLabel incomingPublicLabel = msg.getPublicLabel();
 
         /*
          * Update public label according to TRANSMIT RULE:
@@ -245,33 +287,38 @@ public class ResourceManager {
          *     u = blockerU
          *     transmit()
          */
-        if (this.publicLabel < msg.getPublicLabel()) {
-            publicLabel = msg.getPublicLabel();
+        if (this.publicLabel.compareTo(incomingPublicLabel) < 0) {
+            publicLabel = incomingPublicLabel;
 
-            LOG.info(String.format(
-                    "(TRANSMIT RULE) Before: u/v = %d/%d \t After: u/v = %d/%d",
-                    oldPublicLabel, oldPrivateLabel, publicLabel, privateLabel)
-            );
+            LOG.info("(TRANSMIT RULE) Before: u/v = %s/%s \t After: u/v = %s/%s"
+                    .formatted(oldPublicLabel, oldPrivateLabel, publicLabel, privateLabel));
 
             // Propagate TRANSMIT message
-            if (!waitingSites.isEmpty()) {
-                LOG.info(String.format(
-                        "Transmitting updated public label %d to waiting sites: %s",
-                        publicLabel, waitingSites)
-                );
+            for (Map.Entry<Integer, Set<Integer>> waitersForResource : waitingSitesByResource.entrySet()) {
+                // Now TRANSMIT this updated public label to whoever waiting for this site to release resource
+                final int heldResourceId = waitersForResource.getKey();
+                final Set<Integer> waitingSites = waitersForResource.getValue();
+
+                if (waitingSites.isEmpty()) continue;
+
+                LOG.info("Transmitting updated public label %s to waiting sites: %s for resource: %d"
+                        .formatted(publicLabel, waitingSites, heldResourceId));
+
                 for (int waitingSite : waitingSites) {
                     transport.send(new ResourceMessage.PublicLabelTransmitMsg(
                             siteId,
                             waitingSite,
-                            publicLabel)
+                            publicLabel,
+                            heldResourceId)
                     );
                 }
             }
         }
 
-        // Detect rule is evaluated after processing every transmit message.
-        if (publicLabel == privateLabel) {
-            LOG.severe("Deadlock detected at sites " + siteId + " --- " + msg.getSender());
+        // Detect rule is applied after processing every transmit message:
+        // If incoming public label == own public label and own public label == own private label
+        if (publicLabel.equals(incomingPublicLabel) && publicLabel.equals(privateLabel)) {
+            LOG.severe("Deadlock detected at sites %d --- %d".formatted(siteId, msg.getSender()));
             System.exit(99);
         }
     }

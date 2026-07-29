@@ -1,0 +1,31 @@
+main                      INFO    Site 5 started
+Site 5 [Server Thread]    INFO    Server listening at /127.0.0.1:9005
+Site 5 [Client 127.0.0.1:9003 Thread] INFO    Connecting to 127.0.0.1:9003  ...
+Site 5 [Client 127.0.0.1:9004 Thread] INFO    Connecting to 127.0.0.1:9004  ...
+Site 5 [Client 127.0.0.1:9004 Thread] INFO    Connected to 127.0.0.1:9004
+Site 5 [Client 127.0.0.1:9003 Thread] INFO    Connected to 127.0.0.1:9003
+Site 5 [Message Listener Thread] INFO    LocalCommand: <ReqResourceLockMsg, resourceId: 21>
+Site 5 [Message Listener Thread] INFO    RemoteMessage: <ResourceLockAckMsg, sender: 2, recipient: 5, resourceId: 21, isGranted: false, holderSiteId: 1, waitersForResource: []>
+Site 5 [Message Listener Thread] INFO    Resource 21 is in use by site 1. Querying site 1 for public label.
+Site 5 [Message Listener Thread] INFO    RemoteMessage: <PublicLabelQueryReplyMsg, sender: 1, recipient: 5, publicLabel: <1, 1>, resourceId: 21>
+Site 5 [Message Listener Thread] INFO    (BLOCK RULE) Before: u/v = <5, 5>/<5, 5> 	 After: u/v = <6, 5>/<6, 5>
+Site 5 [Message Listener Thread] INFO    LocalCommand: <PrintStatusMsg>
+Site 5 [Message Listener Thread] INFO    
+==================== Resource Manager ====================
+Public Label : <6, 5>
+Private Label: <6, 5>
+
+Waiting Sites: -
+
+Resources:
+  Resource 51   Holder: null Waiting: -
+  Resource 52   Holder: null Waiting: -
+
+==========================================================
+
+Site 5 [Message Listener Thread] INFO    RemoteMessage: <PublicLabelTransmitMsg, sender: 3, recipient: 5, publicLabel: <6, 3>, resourceId: 21>
+Thread-1                  SEVERE  Error reading input stream from client /127.0.0.1:55950
+java.io.EOFException
+Thread-0                  SEVERE  Error reading input stream from client /127.0.0.1:55940
+java.io.EOFException
+Site 5 [Shutdown hook]    INFO    Shutting down...

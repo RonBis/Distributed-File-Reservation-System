@@ -1,0 +1,33 @@
+main                      INFO    Site 2 started
+Site 2 [Server Thread]    INFO    Server listening at /127.0.0.1:9002
+Site 2 [Client 127.0.0.1:9001 Thread] INFO    Connecting to 127.0.0.1:9001  ...
+Site 2 [Client 127.0.0.1:9003 Thread] INFO    Connecting to 127.0.0.1:9003  ...
+Site 2 [Client 127.0.0.1:9001 Thread] INFO    Connected to 127.0.0.1:9001
+Site 2 [Client 127.0.0.1:9003 Thread] WARNING Connection failed for 127.0.0.1:9003 (attempt 1/60): Connection refused
+Site 2 [Client 127.0.0.1:9003 Thread] INFO    Connecting to 127.0.0.1:9003  ...
+Site 2 [Client 127.0.0.1:9003 Thread] INFO    Connected to 127.0.0.1:9003
+Site 2 [Message Listener Thread] INFO    RemoteMessage: <ReqResourceLockMsg, sender: 1, recipient: 2, resourceId: 21>
+Site 2 [Message Listener Thread] INFO    RemoteMessage: <ReqResourceLockMsg, sender: 3, recipient: 2, resourceId: 21>
+Site 2 [Message Listener Thread] INFO    RemoteMessage: <ReqResourceLockMsg, sender: 4, recipient: 2, resourceId: 21>
+Site 2 [Message Listener Thread] INFO    RemoteMessage: <ReqResourceLockMsg, sender: 5, recipient: 2, resourceId: 21>
+Site 2 [Message Listener Thread] INFO    LocalCommand: <PrintStatusMsg>
+Site 2 [Message Listener Thread] INFO    
+==================== Resource Manager ====================
+Public Label : <2, 2>
+Private Label: <2, 2>
+
+Waiting Sites: -
+
+Resources:
+  Resource 21   Holder: 1   Waiting: [3, 4, 5]
+  Resource 22   Holder: null Waiting: -
+
+==========================================================
+
+Site 2 [Message Listener Thread] INFO    RemoteMessage: <ReqReleaseResourceMsg, sender: 1, recipient: 2, resourceId: 21>
+Site 2 [Message Listener Thread] INFO    Site 1 released lock on resource 21
+Site 2 [Message Listener Thread] INFO    Sending ResourceReleaseAck for resource 21 to site 1
+Site 2 [Message Listener Thread] INFO    Sending ResourceLockAck for resource 21 to waiting site 3 with waiting sites: [4, 5]
+Thread-1                  SEVERE  Error reading input stream from client /127.0.0.1:47020
+java.io.EOFException
+Site 2 [Shutdown hook]    INFO    Shutting down...
