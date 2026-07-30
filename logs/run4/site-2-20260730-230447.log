@@ -1,0 +1,69 @@
+Site 2  [Site                ] INFO    Site 2 started
+Site 2  [Server              ] INFO    Server listening at /127.0.0.1:9002
+Site 2  [Client              ] INFO    Connecting to 127.0.0.1:9001  ...
+Site 2  [Client              ] INFO    Connecting to 127.0.0.1:9003  ...
+Site 2  [Client              ] INFO    Connected to 127.0.0.1:9001
+Site 2  [Client              ] WARNING Connection failed for 127.0.0.1:9003 (attempt 1/60): Connection refused
+Site 2  [Client              ] INFO    Connecting to 127.0.0.1:9003  ...
+Site 2  [Client              ] INFO    Connected to 127.0.0.1:9003
+Site 2  [Site                ] INFO    Remote Message: <ReqResourceLockMsg, sender: 1, recipient: 2, resourceId: 21>
+Site 2  [ResourceManager     ] INFO    Sending lock request acknowledgement to Site 1 for Resource 21 (granted=true, holder=Site 1).
+Site 2  [Client              ] INFO    Outgoing message: <ResourceLockAckMsg, sender: 2, recipient: 1, resourceId: 21, isGranted: true, holderSiteId: 1, waitersForResource: []>
+Site 2  [Site                ] INFO    Remote Message: <ReqResourceLockMsg, sender: 3, recipient: 2, resourceId: 21>
+Site 2  [ResourceManager     ] INFO    Resource 21 is held by Site 1. Notifying holder that Site 3 is waiting.
+Site 2  [Client              ] INFO    Outgoing message: <AddWaitingSiteMsg, sender: 2, recipient: 1, waitingSiteId: 3, resourceId: 21>
+Site 2  [ResourceManager     ] INFO    Sending lock request acknowledgement to Site 3 for Resource 21 (granted=false, holder=Site 1).
+Site 2  [Client              ] INFO    Outgoing message: <ResourceLockAckMsg, sender: 2, recipient: 3, resourceId: 21, isGranted: false, holderSiteId: 1, waitersForResource: []>
+Site 2  [Client              ] INFO    Outgoing message: <PublicLabelQueryMsg, sender: 3, recipient: 1, resourceId: 21>
+Site 2  [Client              ] INFO    Outgoing message: <PublicLabelQueryReplyMsg, sender: 1, recipient: 3, publicLabel: <1, 1>, resourceId: 21>
+Site 2  [Site                ] INFO    Remote Message: <ReqResourceLockMsg, sender: 4, recipient: 2, resourceId: 21>
+Site 2  [ResourceManager     ] INFO    Resource 21 is held by Site 1. Notifying holder that Site 4 is waiting.
+Site 2  [Client              ] INFO    Outgoing message: <AddWaitingSiteMsg, sender: 2, recipient: 1, waitingSiteId: 4, resourceId: 21>
+Site 2  [ResourceManager     ] INFO    Sending lock request acknowledgement to Site 4 for Resource 21 (granted=false, holder=Site 1).
+Site 2  [Client              ] INFO    Outgoing message: <ResourceLockAckMsg, sender: 2, recipient: 4, resourceId: 21, isGranted: false, holderSiteId: 1, waitersForResource: []>
+Site 2  [Site                ] INFO    Remote Message: <ReqResourceLockMsg, sender: 5, recipient: 2, resourceId: 21>
+Site 2  [ResourceManager     ] INFO    Resource 21 is held by Site 1. Notifying holder that Site 5 is waiting.
+Site 2  [Client              ] INFO    Outgoing message: <AddWaitingSiteMsg, sender: 2, recipient: 1, waitingSiteId: 5, resourceId: 21>
+Site 2  [ResourceManager     ] INFO    Sending lock request acknowledgement to Site 5 for Resource 21 (granted=false, holder=Site 1).
+Site 2  [Client              ] INFO    Outgoing message: <ResourceLockAckMsg, sender: 2, recipient: 5, resourceId: 21, isGranted: false, holderSiteId: 1, waitersForResource: []>
+Site 2  [Site                ] INFO    Local Command: <PrintStatusMsg>
+Site 2  [ResourceManager     ] INFO    
+==================== Resource Manager ====================
+Public Label : <2, 2>
+Private Label: <2, 2>
+
+Acquired Resources: -
+
+Waiting Sites: -
+
+Own Resources:
+  Resource 21   Holder: 1   Waiting: [3, 4, 5]
+  Resource 22   Holder: null Waiting: -
+
+==========================================================
+
+Site 2  [Site                ] INFO    Remote Message: <ReqReleaseResourceMsg, sender: 1, recipient: 2, resourceId: 21>
+Site 2  [ResourceManager     ] INFO    Site 1 released lock on resource 21
+Site 2  [ResourceManager     ] INFO    Sending ResourceReleaseAck for resource 21 to site 1
+Site 2  [Client              ] INFO    Outgoing message: <ReleaseResourceAckMsg, sender: 2, recipient: 1, resourceId: 21>
+Site 2  [ResourceManager     ] INFO    Sending ResourceLockAck for resource 21 to waiting site 3 with waiting sites: [4, 5]
+Site 2  [Client              ] INFO    Outgoing message: <ResourceLockAckMsg, sender: 2, recipient: 3, resourceId: 21, isGranted: true, holderSiteId: null, waitersForResource: [4, 5]>
+Site 2  [Site                ] INFO    Local Command: <PrintStatusMsg>
+Site 2  [ResourceManager     ] INFO    
+==================== Resource Manager ====================
+Public Label : <2, 2>
+Private Label: <2, 2>
+
+Acquired Resources: -
+
+Waiting Sites: -
+
+Own Resources:
+  Resource 21   Holder: 3   Waiting: [4, 5]
+  Resource 22   Holder: null Waiting: -
+
+==========================================================
+
+Site 2  [Server              ] SEVERE  Error reading input stream from client /127.0.0.1:52026
+java.io.EOFException
+Site 2  [Site                ] INFO    Shutting down...

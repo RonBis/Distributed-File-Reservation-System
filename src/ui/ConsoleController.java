@@ -1,4 +1,4 @@
-package application;
+package ui;
 
 import comm.Transport;
 import comm.message.LocalMessage;
@@ -14,7 +14,7 @@ public final class ConsoleController implements Runnable {
         this.siteId = siteId;
         this.transport = transport;
 
-        new Thread(this, "Site " + siteId + " [Console]").start();
+        new Thread(this, "[Console]").start();
     }
 
     @Override

@@ -1,0 +1,70 @@
+Site 3  [Site                ] INFO    Site 3 started
+Site 3  [Server              ] INFO    Server listening at /127.0.0.1:9003
+Site 3  [Client              ] INFO    Connecting to 127.0.0.1:9004  ...
+Site 3  [Client              ] INFO    Connecting to 127.0.0.1:9005  ...
+Site 3  [Client              ] INFO    Connecting to 127.0.0.1:9002  ...
+Site 3  [Client              ] WARNING Connection failed for 127.0.0.1:9004 (attempt 1/60): Connection refused
+Site 3  [Client              ] INFO    Connected to 127.0.0.1:9002
+Site 3  [Client              ] WARNING Connection failed for 127.0.0.1:9005 (attempt 1/60): Connection refused
+Site 3  [Client              ] INFO    Connecting to 127.0.0.1:9004  ...
+Site 3  [Client              ] INFO    Connecting to 127.0.0.1:9005  ...
+Site 3  [Client              ] INFO    Connected to 127.0.0.1:9004
+Site 3  [Client              ] INFO    Connected to 127.0.0.1:9005
+Site 3  [Site                ] INFO    Local Command: <ReqResourceLockMsg, resourceId: 21>
+Site 3  [ResourceManager     ] INFO    Requesting Resource 21 from Site 2.
+Site 3  [Client              ] INFO    Outgoing message: <ReqResourceLockMsg, sender: 3, recipient: 2, resourceId: 21>
+Site 3  [Site                ] INFO    Remote Message: <ResourceLockAckMsg, sender: 2, recipient: 3, resourceId: 21, isGranted: false, holderSiteId: 1, waitersForResource: []>
+Site 3  [ResourceManager     ] INFO    Resource 21 is in use by site 1. Querying site 1 for public label.
+Site 3  [Client              ] INFO    Outgoing message: <PublicLabelQueryMsg, sender: 3, recipient: 1, resourceId: 21>
+Site 3  [Site                ] INFO    Remote Message: <PublicLabelQueryReplyMsg, sender: 1, recipient: 3, publicLabel: <1, 1>, resourceId: 21>
+Site 3  [ResourceManager     ] INFO    (BLOCK RULE) Before: u/v = <3, 3>/<3, 3> 	 After: u/v = <4, 3>/<4, 3>
+Site 3  [Client              ] INFO    Outgoing message: <ReqResourceLockMsg, sender: 5, recipient: 2, resourceId: 21>
+Site 3  [Client              ] INFO    Outgoing message: <ResourceLockAckMsg, sender: 2, recipient: 5, resourceId: 21, isGranted: false, holderSiteId: 1, waitersForResource: []>
+Site 3  [Site                ] INFO    Local Command: <PrintStatusMsg>
+Site 3  [ResourceManager     ] INFO    
+==================== Resource Manager ====================
+Public Label : <4, 3>
+Private Label: <4, 3>
+
+Acquired Resources: -
+
+Waiting Sites: -
+
+Own Resources:
+  Resource 32   Holder: null Waiting: -
+  Resource 31   Holder: null Waiting: -
+
+==========================================================
+
+Site 3  [Site                ] INFO    Remote Message: <ResourceLockAckMsg, sender: 2, recipient: 3, resourceId: 21, isGranted: true, holderSiteId: null, waitersForResource: [4, 5]>
+Site 3  [ResourceManager     ] INFO    Resource 21 granted by site 2
+Site 3  [Site                ] INFO    Local Command: <PrintStatusMsg>
+Site 3  [ResourceManager     ] INFO    
+==================== Resource Manager ====================
+Public Label : <4, 3>
+Private Label: <4, 3>
+
+Acquired Resources: 21
+
+Waiting Sites: {21=[4, 5]}
+
+Own Resources:
+  Resource 32   Holder: null Waiting: -
+  Resource 31   Holder: null Waiting: -
+
+==========================================================
+
+Site 3  [Site                ] INFO    Local Command: <ReqResourceLockMsg, resourceId: 41>
+Site 3  [ResourceManager     ] INFO    Requesting Resource 41 from Site 4.
+Site 3  [Client              ] INFO    Outgoing message: <ReqResourceLockMsg, sender: 3, recipient: 4, resourceId: 41>
+Site 3  [Site                ] INFO    Remote Message: <ResourceLockAckMsg, sender: 4, recipient: 3, resourceId: 41, isGranted: false, holderSiteId: 4, waitersForResource: []>
+Site 3  [ResourceManager     ] INFO    Resource 41 is in use by site 4. Querying site 4 for public label.
+Site 3  [Client              ] INFO    Outgoing message: <PublicLabelQueryMsg, sender: 3, recipient: 4, resourceId: 41>
+Site 3  [Site                ] INFO    Remote Message: <PublicLabelQueryReplyMsg, sender: 4, recipient: 3, publicLabel: <5, 4>, resourceId: 41>
+Site 3  [ResourceManager     ] INFO    (BLOCK RULE) Before: u/v = <4, 3>/<4, 3> 	 After: u/v = <6, 3>/<6, 3>
+Site 3  [ResourceManager     ] INFO    Transmitting updated public label <6, 3> to waiting sites: [4, 5] for resource: 21
+Site 3  [Client              ] INFO    Outgoing message: <PublicLabelTransmitMsg, sender: 3, recipient: 4, publicLabel: <6, 3>, resourceId: 21>
+Site 3  [Client              ] INFO    Outgoing message: <PublicLabelTransmitMsg, sender: 3, recipient: 5, publicLabel: <6, 3>, resourceId: 21>
+Site 3  [Site                ] INFO    Remote Message: <PublicLabelTransmitMsg, sender: 4, recipient: 3, publicLabel: <6, 3>, resourceId: 41>
+Site 3  [ResourceManager     ] SEVERE  Deadlock detected at sites 3 --- 4
+Site 3  [Site                ] INFO    Shutting down...

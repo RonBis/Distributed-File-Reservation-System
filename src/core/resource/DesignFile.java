@@ -1,4 +1,4 @@
-package application.resource;
+package core.resource;
 
 public class DesignFile extends Resource {
 

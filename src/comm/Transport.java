@@ -1,8 +1,8 @@
 package comm;
 
-import application.Site;
-import application.SiteConfig;
 import comm.message.AbstractMessage;
+import core.Site;
+import core.SiteConfig;
 import util.Log;
 
 import java.io.IOException;
@@ -49,7 +49,7 @@ public class Transport {
         }
 
         // Start server thread
-        final Thread serverThread = new Thread(server, "Site " + site.getId() + " [Server Thread]");
+        final Thread serverThread = new Thread(server, "[Server Thread]");
         // Server exception handler
         serverThread.setUncaughtExceptionHandler((_, throwable) -> {
             LOG.severe("Server thread failed: " + throwable.getMessage());
@@ -64,7 +64,7 @@ public class Transport {
 
             messageListenerThread = new Thread(
                     this::listenMessages,
-                    "Site " + site.getId() + " [Message Listener Thread]");
+                    "[Message Listener Thread]");
 
             // MessageListener exception handler
             messageListenerThread.setUncaughtExceptionHandler(

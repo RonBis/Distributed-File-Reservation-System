@@ -1,20 +1,14 @@
-package application;
-
-import application.resource.ResourceManager;
-
-import java.time.Instant;
-import java.util.ArrayList;
-import java.util.HashMap;
-import java.util.HashSet;
-import java.util.List;
-import java.util.Map;
-import java.util.Set;
-import java.util.logging.Logger;
+package core.snapshot;
 
 import comm.Transport;
 import comm.message.AbstractMessage;
 import comm.message.SnapshotMessage;
+import core.resource.ResourceManager;
 import util.Log;
+
+import java.time.Instant;
+import java.util.*;
+import java.util.logging.Logger;
 
 public class SnapshotRecorder {
 
@@ -187,7 +181,7 @@ public class SnapshotRecorder {
             return;
         }
 
-        channelStates.computeIfAbsent(senderId, k -> new ArrayList<>()).add(msg);
+        channelStates.computeIfAbsent(senderId, _ -> new ArrayList<>()).add(msg);
 
         LOG.info("Site " + siteId + " recorded in-transit message on channel from "
                 + senderId + " for snapshot " + snapshotId + ": " + msg);

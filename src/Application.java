@@ -1,5 +1,5 @@
-package application;
-
+import core.Site;
+import core.SiteConfig;
 import util.FileReader;
 import util.Log;
 
@@ -170,7 +170,7 @@ public class Application {
                 }
             }
 
-            // If DFS reached all nodes, this candidate is a valid initiator
+            // If DFS has reached all nodes, this candidate is a valid initiator
             if (visited.containsAll(allSiteIds)) {
                 return candidateId;
             }

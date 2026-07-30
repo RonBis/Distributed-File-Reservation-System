@@ -1,6 +1,6 @@
 package comm.message;
 
-import application.resource.MitchellMerrittLabel;
+import core.resource.MitchellMerrittLabel;
 
 import java.util.Set;
 

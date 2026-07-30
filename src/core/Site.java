@@ -1,12 +1,14 @@
-package application;
+package core;
 
-import application.resource.ResourceManager;
 import comm.MessageReceiver;
 import comm.Transport;
 import comm.message.AbstractMessage;
 import comm.message.LocalMessage;
 import comm.message.ResourceMessage;
 import comm.message.SnapshotMessage;
+import core.resource.ResourceManager;
+import core.snapshot.SnapshotRecorder;
+import ui.ConsoleController;
 import util.Log;
 
 import java.util.Map;
@@ -30,7 +32,7 @@ public class Site implements Runnable, MessageReceiver {
 
         // Register graceful shutdown hook, ie: close server before System.exit()
         Runtime.getRuntime().addShutdownHook(
-                new Thread(this::shutdown, "Site " + id + " [Shutdown hook]"));
+                new Thread(this::shutdown, "[Shutdown hook]"));
 
         this.transport = new Transport(conf, this);
         this.resourceManager = new ResourceManager(id, globalDesignFileTable, transport);
@@ -44,7 +46,7 @@ public class Site implements Runnable, MessageReceiver {
                 transport
         );
 
-        new Thread(this, "Site " + id + " [Main Thread]").start();
+        new Thread(this, "[Main Thread]").start();
     }
 
     public int getId() {
@@ -56,12 +58,22 @@ public class Site implements Runnable, MessageReceiver {
         new ConsoleController(id, transport);
     }
 
+    /**
+     * Processes an incoming message for this site.
+     *
+     * <p>All network messages and local console commands are delivered through this
+     * method, ensuring that the site's state is modified by a single message-processing
+     * thread. Depending on the message type, the request is delegated to the
+     * ResourceManager, snapshot recorder, or other site components.</p>
+     *
+     * @param msg the message to process
+     */
     @Override
     public void onMessage(AbstractMessage msg) {
         if (msg instanceof LocalMessage) {
-            LOG.info("LocalCommand: " + msg);
+            LOG.info("Local Command: " + msg);
         } else {
-            LOG.info("RemoteMessage: " + msg);
+            LOG.info("Remote Message: " + msg);
 
             // Record this message as part of channel state
             // if appropriate. (non-marker messages)

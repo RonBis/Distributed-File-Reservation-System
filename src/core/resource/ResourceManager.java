@@ -1,4 +1,4 @@
-package application.resource;
+package core.resource;
 
 import comm.Transport;
 import comm.message.ResourceMessage;
@@ -16,6 +16,9 @@ public class ResourceManager {
     private final Map<Integer, Integer> globalResourceTable;
     /// Map: Resource id => Resource object
     private final Map<Integer, Resource> resourceMap = new HashMap<>();
+
+    /// Resource ids currently held (locked) by this site, regardless of which site is home for them
+    private final Set<Integer> heldResourceIds = new HashSet<>();
 
     // Public label and private labels to detect deadlock using Mitchell-Merritt algorithm
     private MitchellMerrittLabel publicLabel, privateLabel;
@@ -77,13 +80,11 @@ public class ResourceManager {
     }
 
     private String formatOwnedResourcesDisplay() {
-        return resourceMap.values().stream()
-                .filter(resource -> Objects.equals(resource.getHolder(), siteId))
-                .map(resource -> String.valueOf(resource.getId()))
-                .collect(Collectors.collectingAndThen(
-                        Collectors.joining(", "),
-                        s -> s.isEmpty() ? "-" : s
-                ));
+        if (heldResourceIds.isEmpty()) return "-";
+
+        return heldResourceIds.stream()
+                .map(String::valueOf)
+                .collect(Collectors.joining(", "));
     }
 
     private String formatResourcesDisplay() {
@@ -105,6 +106,9 @@ public class ResourceManager {
     public void requestResource(int resourceId) {
         final int destinationSiteId = globalResourceTable.get(resourceId);
 
+        LOG.info("Requesting Resource %d from Site %d."
+                .formatted(resourceId, destinationSiteId));
+
         transport.send(new ResourceMessage.ReqResourceLockMsg(
                 siteId,
                 destinationSiteId,
@@ -115,6 +119,9 @@ public class ResourceManager {
     // Called by the current site
     public void releaseResource(int resourceId) {
         final int destinationSiteId = globalResourceTable.get(resourceId);
+
+        LOG.info("Requesting release of Resource %d from Site %d."
+                .formatted(resourceId, destinationSiteId));
 
         transport.send(new ResourceMessage.ReqReleaseResourceMsg(
                 siteId,
@@ -131,6 +138,9 @@ public class ResourceManager {
         final boolean requestGranted = resource.requestLock(requestingSiteId);
         if (!requestGranted) {
             // Send a message AddWaitingSite message to let the resource holder know another site is waiting for it
+            LOG.info("Resource %d is held by Site %d. Notifying holder that Site %d is waiting."
+                    .formatted(resourceId, resource.getHolder(), requestingSiteId));
+
             transport.send(new ResourceMessage.AddWaitingSiteMsg(
                     siteId,
                     resource.getHolder(),
@@ -140,6 +150,9 @@ public class ResourceManager {
         }
 
         // Send ACK to the resource requester (Message sender)
+        LOG.info("Sending resource lock request acknowledgement to Site %d for Resource %d (granted=%s, holder=Site %d)."
+                .formatted(requestingSiteId, resourceId, requestGranted, resource.getHolder()));
+
         transport.send(new ResourceMessage.ResourceLockAckMsg(
                 siteId,
                 requestingSiteId,
@@ -154,7 +167,9 @@ public class ResourceManager {
         final int resourceId = msg.getResourceId();
 
         if (msg.isGranted()) {
-            LOG.info("Resource " + resourceId + " granted by site " + msg.getSender());
+            LOG.info("Resource " + resourceId + " granted by site " + msg.getSender() + ".");
+
+            heldResourceIds.add(resourceId);
 
             // Update waiting sites list when a resource is granted later
             waitingSitesByResource.computeIfAbsent(resourceId, _ -> new HashSet<>())
@@ -180,13 +195,13 @@ public class ResourceManager {
         try {
             next = resourceMap.get(resourceId).releaseLock(msg.getSender());
 
-            LOG.info("Site " + msg.getSender() + " released lock on resource " + resourceId);
+            LOG.info("Site " + msg.getSender() + " released lock on resource " + resourceId + ".");
         } catch (IllegalStateException ignore) {
             return;
         }
 
         // Send ReleaseResourceACK to sender
-        LOG.info("Sending ResourceReleaseAck for resource %d to site %d"
+        LOG.info("Sending ResourceReleaseAck for resource %d to site %d."
                 .formatted(resourceId, msg.getSender()));
 
         transport.send(new ResourceMessage.ReleaseResourceAckMsg(
@@ -201,7 +216,7 @@ public class ResourceManager {
             // NPE on Set.copyOf().
             final Set<Integer> waiters = Set.copyOf(resourceMap.get(resourceId).getReqQ());
 
-            LOG.info("Sending ResourceLockAck for resource %d to waiting site %d with waiting sites: %s"
+            LOG.info("Sending ResourceLockAck for resource %d to waiting site %d with waiting sites: %s."
                     .formatted(resourceId, next, waiters));
 
             transport.send(new ResourceMessage.ResourceLockAckMsg(
@@ -217,16 +232,19 @@ public class ResourceManager {
 
     public void handleReleaseResourceAckMsg(ResourceMessage.ReleaseResourceAckMsg msg) {
         final int resourceId = msg.getResourceId();
+
+        heldResourceIds.remove(resourceId);
+
         final Set<Integer> waitingSitesToBeRemoved = waitingSitesByResource.get(resourceId);
 
         if (waitingSitesToBeRemoved != null && !waitingSitesToBeRemoved.isEmpty()) {
             waitingSitesToBeRemoved.clear();
-            LOG.info("Cleared local waiting list for resource: %d".formatted(resourceId));
+            LOG.info("Cleared local waiting list for resource: %d.".formatted(resourceId));
         }
     }
 
     public void handleAddWaitingSiteMsg(ResourceMessage.AddWaitingSiteMsg msg) {
-        LOG.info("Site " + msg.getWaitingSiteId() + " is waiting on me");
+        LOG.info("Site " + msg.getWaitingSiteId() + " is waiting on me.");
 
         final int resourceId = msg.getResourceId();
         // Add waiting site for the particular resource
@@ -235,6 +253,8 @@ public class ResourceManager {
     }
 
     public void handlePublicLabelQueryMsg(ResourceMessage.PublicLabelQueryMsg msg) {
+        LOG.info("Sending public label %s to asking site: %d.".formatted(publicLabel, msg.getSender()));
+
         transport.send(new ResourceMessage.PublicLabelQueryReplyMsg(
                 siteId,
                 msg.getSender(),
@@ -267,7 +287,7 @@ public class ResourceManager {
 
             if (waitingSites.isEmpty()) continue;
 
-            LOG.info("Transmitting updated public label %s to waiting sites: %s for resource: %d"
+            LOG.info("Transmitting updated public label %s to waiting sites: %s for resource: %d."
                     .formatted(publicLabel, waitingSites, heldResourceId));
 
             for (int waitingSite : waitingSites) {
@@ -305,7 +325,7 @@ public class ResourceManager {
 
                 if (waitingSites.isEmpty()) continue;
 
-                LOG.info("Transmitting updated public label %s to waiting sites: %s for resource: %d"
+                LOG.info("Transmitting updated public label %s to waiting sites: %s for resource: %d."
                         .formatted(publicLabel, waitingSites, heldResourceId));
 
                 for (int waitingSite : waitingSites) {
@@ -322,7 +342,7 @@ public class ResourceManager {
         // Detect rule is applied after processing every transmit message:
         // If incoming public label == own public label and own public label == own private label
         if (publicLabel.equals(incomingPublicLabel) && publicLabel.equals(privateLabel)) {
-            LOG.severe("Deadlock detected at sites %d --- %d".formatted(siteId, msg.getSender()));
+            LOG.severe("Deadlock detected at sites %d --- %d.".formatted(siteId, msg.getSender()));
             System.exit(99);
         }
     }
