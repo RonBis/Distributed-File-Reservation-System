@@ -1,5 +1,5 @@
-package application;
-
+import core.Site;
+import core.SiteConfig;
 import util.FileReader;
 import util.Log;
 
@@ -37,7 +37,7 @@ public class Application {
             final Map<Integer, Integer> globalDesignFileTable = readResourceTable();
 
             new Site(siteConf, globalDesignFileTable);
-        } catch (IOException e) {
+        } catch (Exception e) {
             System.err.println("Failed to start site! Exiting\n" + e);
             System.exit(2);
         }
@@ -71,10 +71,13 @@ public class Application {
             sitePeerIdAddrMap.put(peerId, siteIdAddrMap.get(peerId));
         }
 
+        // Find initiator
+        int initiatorId = findInitiator(sitePeerIdsMap);
+
         // Find next hops along the shortest path to a destination using BFS
         final Map<Integer, Integer> nextHopMap =
                 calculateNextHopsAlongShortestPath(siteId, siteIdAddrMap.keySet(), sitePeerIdsMap);
-        return new SiteConfig(siteId, siteIdAddrMap.get(siteId), sitePeerIdAddrMap, nextHopMap);
+        return new SiteConfig(siteId, siteIdAddrMap.get(siteId), sitePeerIdAddrMap, nextHopMap, initiatorId);
     }
 
     private static Map<Integer, Integer> readResourceTable() throws IOException {
@@ -136,5 +139,43 @@ public class Application {
             nextHopMap.put(dest, node);
         }
         return nextHopMap;
+    }
+
+    /**
+     * Find a single initiator for the graph using DFS reachability.
+     * For each site ID, run a DFS and check if it can reach all other sites.
+     * The first site that can reach everyone is chosen as initiator.
+     */
+    private static int findInitiator(Map<Integer, int[]> sitePeerIdsMap) {
+        final Set<Integer> allSiteIds = sitePeerIdsMap.keySet();
+
+        for (int candidateId : allSiteIds) {
+            // DFS from candidateId
+            final Set<Integer> visited = new HashSet<>();
+            final Deque<Integer> stack = new ArrayDeque<>();
+            stack.push(candidateId);
+
+            while (!stack.isEmpty()) {
+                final int curr = stack.pop();
+                if (!visited.add(curr)) {
+                    continue;
+                }
+                final int[] neighbours = sitePeerIdsMap.get(curr);
+                if (neighbours != null) {
+                    for (int n : neighbours) {
+                        if (!visited.contains(n)) {
+                            stack.push(n);
+                        }
+                    }
+                }
+            }
+
+            // If DFS has reached all nodes, this candidate is a valid initiator
+            if (visited.containsAll(allSiteIds)) {
+                return candidateId;
+            }
+        }
+
+        throw new IllegalStateException("No initiator found that can reach all sites!");
     }
 }

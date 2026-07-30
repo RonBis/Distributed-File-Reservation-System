@@ -52,6 +52,8 @@ public class Client {
     }
 
     public synchronized void send(AbstractMessage m) throws IOException {
+        LOG.info("Outgoing message: " + m);
+
         out.writeObject(m);
         out.flush();
     }

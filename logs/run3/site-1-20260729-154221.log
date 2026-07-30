@@ -1,0 +1,42 @@
+main                      INFO    Site 1 started
+Site 1 [Server Thread]    INFO    Server listening at /127.0.0.1:9001
+Site 1 [Client 127.0.0.1:9002 Thread] INFO    Connecting to 127.0.0.1:9002  ...
+Site 1 [Client 127.0.0.1:9004 Thread] INFO    Connecting to 127.0.0.1:9004  ...
+Site 1 [Client 127.0.0.1:9002 Thread] WARNING Connection failed for 127.0.0.1:9002 (attempt 1/60): Connection refused
+Site 1 [Client 127.0.0.1:9004 Thread] WARNING Connection failed for 127.0.0.1:9004 (attempt 1/60): Connection refused
+Site 1 [Client 127.0.0.1:9002 Thread] INFO    Connecting to 127.0.0.1:9002  ...
+Site 1 [Client 127.0.0.1:9004 Thread] INFO    Connecting to 127.0.0.1:9004  ...
+Site 1 [Client 127.0.0.1:9004 Thread] WARNING Connection failed for 127.0.0.1:9004 (attempt 2/60): Connection refused
+Site 1 [Client 127.0.0.1:9002 Thread] INFO    Connected to 127.0.0.1:9002
+Site 1 [Client 127.0.0.1:9004 Thread] INFO    Connecting to 127.0.0.1:9004  ...
+Site 1 [Client 127.0.0.1:9004 Thread] INFO    Connected to 127.0.0.1:9004
+Site 1 [Message Listener Thread] INFO    LocalCommand: <ReqResourceLockMsg, resourceId: 21>
+Site 1 [Message Listener Thread] INFO    RemoteMessage: <ResourceLockAckMsg, sender: 2, recipient: 1, resourceId: 21, isGranted: true, holderSiteId: 1, waitersForResource: []>
+Site 1 [Message Listener Thread] INFO    Resource 21 granted by site 2
+Site 1 [Message Listener Thread] INFO    RemoteMessage: <AddWaitingSiteMsg, sender: 2, recipient: 1, waitingSiteId: 3, resourceId: 21>
+Site 1 [Message Listener Thread] INFO    Site 3 is waiting on me
+Site 1 [Message Listener Thread] INFO    RemoteMessage: <PublicLabelQueryMsg, sender: 3, recipient: 1, resourceId: 21>
+Site 1 [Message Listener Thread] INFO    RemoteMessage: <AddWaitingSiteMsg, sender: 2, recipient: 1, waitingSiteId: 4, resourceId: 21>
+Site 1 [Message Listener Thread] INFO    Site 4 is waiting on me
+Site 1 [Message Listener Thread] INFO    RemoteMessage: <PublicLabelQueryMsg, sender: 4, recipient: 1, resourceId: 21>
+Site 1 [Message Listener Thread] INFO    RemoteMessage: <AddWaitingSiteMsg, sender: 2, recipient: 1, waitingSiteId: 5, resourceId: 21>
+Site 1 [Message Listener Thread] INFO    Site 5 is waiting on me
+Site 1 [Message Listener Thread] INFO    RemoteMessage: <PublicLabelQueryMsg, sender: 5, recipient: 1, resourceId: 21>
+Site 1 [Message Listener Thread] INFO    LocalCommand: <PrintStatusMsg>
+Site 1 [Message Listener Thread] INFO    
+==================== Resource Manager ====================
+Public Label : <1, 1>
+Private Label: <1, 1>
+
+Waiting Sites: {21=[3, 4, 5]}
+
+Resources:
+  Resource 11   Holder: null Waiting: -
+  Resource 12   Holder: null Waiting: -
+
+==========================================================
+
+Site 1 [Message Listener Thread] INFO    LocalCommand: <ReqReleaseResourceMsg, resourceId: 21>
+Site 1 [Message Listener Thread] INFO    RemoteMessage: <ReleaseResourceAckMsg, sender: 2, recipient: 1, resourceId: 21>
+Site 1 [Message Listener Thread] INFO    Cleared local waiting list for resource: 21
+Site 1 [Shutdown hook]    INFO    Shutting down...

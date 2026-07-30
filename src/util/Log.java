@@ -14,6 +14,8 @@ public final class Log {
     private static String LOG_FILE;
     private static Handler SHARED_HANDLER;
 
+    private static int siteId;
+
     static {
         try {
             Files.createDirectories(Path.of("logs"));
@@ -26,6 +28,8 @@ public final class Log {
     }
 
     public static synchronized void initialize(int siteId) {
+        Log.siteId = siteId;
+
         if (SHARED_HANDLER != null)
             throw new IllegalStateException("Logger already initialized.");
 
@@ -45,7 +49,7 @@ public final class Log {
         if (SHARED_HANDLER == null)
             throw new IllegalStateException("Call Log.initialize() before getLogger().");
 
-        Logger logger = Logger.getLogger(name);
+        final Logger logger = Logger.getLogger(name);
         logger.setUseParentHandlers(false);
         logger.setLevel(Level.ALL);
 
@@ -64,7 +68,7 @@ public final class Log {
     }
 
     private static Handler createHandler() throws IOException {
-        Handler handler = switch (LOG_MODE) {
+        final Handler handler = switch (LOG_MODE) {
             case FILE -> new FileHandler(LOG_FILE, true) {
                 @Override
                 public synchronized void publish(LogRecord record) {
@@ -80,8 +84,9 @@ public final class Log {
             @Override
             public String format(LogRecord record) {
                 return String.format(
-                        "%-25s %-7s %s%n",
-                        Thread.currentThread().getName(),
+                        "Site %-2d [%-20s]  %-7s  %s%n",
+                        siteId,
+                        record.getLoggerName(),
                         record.getLevel().getName(),
                         record.getMessage()
                 );

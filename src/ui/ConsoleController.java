@@ -1,4 +1,4 @@
-package application;
+package ui;
 
 import comm.Transport;
 import comm.message.LocalMessage;
@@ -14,7 +14,7 @@ public final class ConsoleController implements Runnable {
         this.siteId = siteId;
         this.transport = transport;
 
-        new Thread(this, "Site " + siteId + " [Console]").start();
+        new Thread(this, "[Console]").start();
     }
 
     @Override
@@ -58,6 +58,10 @@ public final class ConsoleController implements Runnable {
                             new LocalMessage.PrintStatusMsg(siteId)
                     );
 
+                    case "snapshot" -> transport.postLocalMessage(
+                            new LocalMessage.ReqSnapshotMsg(siteId)
+                    );
+
                     case "exit", "quit" -> transport.postLocalMessage(
                             new LocalMessage.ExitMsg(siteId)
                     );
@@ -85,6 +89,7 @@ public final class ConsoleController implements Runnable {
                   lock <resource-id>
                   release <resource-id>
                   status
+                  snapshot
                   help
                   exit
                 """);

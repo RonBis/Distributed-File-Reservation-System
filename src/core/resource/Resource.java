@@ -1,4 +1,4 @@
-package application.resource;
+package core.resource;
 
 import util.Log;
 
@@ -9,7 +9,8 @@ import java.util.logging.Logger;
 abstract public class Resource {
 
     private final int id;
-    private Integer lockedBySiteId = null;
+    /// Nullable field. If this is null, then this [Resource] is not currently in use by any [core.Site].
+    private Integer lockedBySiteId;
     /// Stores incoming resource requests in FIFO order
     private final Queue<Integer> reqQ = new LinkedList<>();
 
@@ -24,7 +25,7 @@ abstract public class Resource {
     }
 
     /// Could return null
-    public Integer getLockedBySiteId() {
+    public Integer getHolder() {
         return lockedBySiteId;
     }
 

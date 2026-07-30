@@ -1,0 +1,36 @@
+Site 5  [Site                ] INFO    Site 5 started
+Site 5  [Server              ] INFO    Server listening at /127.0.0.1:9005
+Site 5  [Client              ] INFO    Connecting to 127.0.0.1:9004  ...
+Site 5  [Client              ] INFO    Connecting to 127.0.0.1:9003  ...
+Site 5  [Client              ] INFO    Connected to 127.0.0.1:9003
+Site 5  [Client              ] INFO    Connected to 127.0.0.1:9004
+Site 5  [Site                ] INFO    Local Command: <ReqResourceLockMsg, resourceId: 21>
+Site 5  [ResourceManager     ] INFO    Requesting Resource 21 from Site 2.
+Site 5  [Client              ] INFO    Outgoing message: <ReqResourceLockMsg, sender: 5, recipient: 2, resourceId: 21>
+Site 5  [Site                ] INFO    Remote Message: <ResourceLockAckMsg, sender: 2, recipient: 5, resourceId: 21, isGranted: false, holderSiteId: 1, waitersForResource: []>
+Site 5  [ResourceManager     ] INFO    Resource 21 is in use by site 1. Querying site 1 for public label.
+Site 5  [Client              ] INFO    Outgoing message: <PublicLabelQueryMsg, sender: 5, recipient: 1, resourceId: 21>
+Site 5  [Site                ] INFO    Remote Message: <PublicLabelQueryReplyMsg, sender: 1, recipient: 5, publicLabel: <1, 1>, resourceId: 21>
+Site 5  [ResourceManager     ] INFO    (BLOCK RULE) Before: u/v = <5, 5>/<5, 5> 	 After: u/v = <6, 5>/<6, 5>
+Site 5  [Site                ] INFO    Local Command: <PrintStatusMsg>
+Site 5  [ResourceManager     ] INFO    
+==================== Resource Manager ====================
+Public Label : <6, 5>
+Private Label: <6, 5>
+
+Acquired Resources: -
+
+Waiting Sites: -
+
+Own Resources:
+  Resource 51   Holder: null Waiting: -
+  Resource 52   Holder: null Waiting: -
+
+==========================================================
+
+Site 5  [Site                ] INFO    Remote Message: <PublicLabelTransmitMsg, sender: 3, recipient: 5, publicLabel: <6, 3>, resourceId: 21>
+Site 5  [Server              ] SEVERE  Error reading input stream from client /127.0.0.1:47746
+java.io.EOFException
+Site 5  [Server              ] SEVERE  Error reading input stream from client /127.0.0.1:46060
+java.io.EOFException
+Site 5  [Site                ] INFO    Shutting down...

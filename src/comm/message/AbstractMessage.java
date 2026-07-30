@@ -6,7 +6,7 @@ import java.lang.reflect.Field;
 import java.lang.reflect.Modifier;
 
 public abstract sealed class AbstractMessage implements Serializable
-        permits LocalMessage, ResourceMessage {
+        permits LocalMessage, ResourceMessage, SnapshotMessage {
 
     @Serial
     private static final long serialVersionUID = 1L;
