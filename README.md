@@ -2,7 +2,7 @@
 
 ## Requirements
 
-- Java 21 JDK
+- Java 21 JDK or newer.
 - Run all commands from the project root directory.
 
 Check Java:
