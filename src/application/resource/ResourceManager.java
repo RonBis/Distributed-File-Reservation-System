@@ -51,7 +51,11 @@ public class ResourceManager {
     }
 
     public void printStatus() {
-        LOG.info("""
+        LOG.info(getStatus());
+    }
+
+    public String getStatus() {
+        return """
                 
                 ==================== Resource Manager ====================
                 Public Label : %s
@@ -69,7 +73,7 @@ public class ResourceManager {
                 formatOwnedResourcesDisplay(),
                 waitingSitesByResource.isEmpty() ? "-" : waitingSitesByResource,
                 formatResourcesDisplay()
-        ));
+        );
     }
 
     private String formatOwnedResourcesDisplay() {
