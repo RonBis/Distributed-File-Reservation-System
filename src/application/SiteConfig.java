@@ -12,6 +12,7 @@ public record SiteConfig(
         int id,
         String addr,
         Map<Integer, String> peerIdAddrMap,
-        Map<Integer, Integer> nextHopMap
+        Map<Integer, Integer> nextHopMap,
+        int initiatorId
 ) {
 }

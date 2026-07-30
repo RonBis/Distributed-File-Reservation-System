@@ -1,10 +1,7 @@
 package comm.message;
 
 public abstract sealed class LocalMessage extends AbstractMessage
-        permits LocalMessage.ReqResourceLockMsg,
-        LocalMessage.ReqReleaseResourceMsg,
-        LocalMessage.PrintStatusMsg,
-        LocalMessage.ExitMsg {
+        permits LocalMessage.ExitMsg, LocalMessage.PrintStatusMsg, LocalMessage.ReqSnapshotMsg, LocalMessage.ReqReleaseResourceMsg, LocalMessage.ReqResourceLockMsg {
 
     protected LocalMessage(int siteId) {
         super(siteId, siteId);
@@ -38,6 +35,12 @@ public abstract sealed class LocalMessage extends AbstractMessage
 
     public static final class PrintStatusMsg extends LocalMessage {
         public PrintStatusMsg(int siteId) {
+            super(siteId);
+        }
+    }
+
+    public static final class ReqSnapshotMsg extends LocalMessage {
+        public ReqSnapshotMsg(int siteId) {
             super(siteId);
         }
     }

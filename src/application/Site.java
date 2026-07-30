@@ -6,6 +6,7 @@ import comm.Transport;
 import comm.message.AbstractMessage;
 import comm.message.LocalMessage;
 import comm.message.ResourceMessage;
+import comm.message.SnapshotMessage;
 import util.Log;
 
 import java.util.Map;
@@ -16,10 +17,14 @@ public class Site implements Runnable, MessageReceiver {
     private final int id;
     private final ResourceManager resourceManager;
     private final Transport transport;
+    private final SnapshotRecorder snapshotRecorder;
 
     private static final Logger LOG = Log.getLogger(Site.class.getSimpleName());
 
-    public Site(SiteConfig conf, Map<Integer, Integer> globalDesignFileTable) {
+    public Site(
+            SiteConfig conf,
+            Map<Integer, Integer> globalDesignFileTable
+    ) {
         this.id = conf.id();
         LOG.info("Site " + id + " started");
 
@@ -30,6 +35,14 @@ public class Site implements Runnable, MessageReceiver {
         this.transport = new Transport(conf, this);
         this.resourceManager = new ResourceManager(id, globalDesignFileTable, transport);
 
+        // Snapshot recording
+        this.snapshotRecorder = new SnapshotRecorder(
+                id,
+                conf.initiatorId(),
+                conf.peerIdAddrMap().keySet(),
+                resourceManager,
+                transport
+        );
 
         new Thread(this, "Site " + id + " [Main Thread]").start();
     }
@@ -49,8 +62,29 @@ public class Site implements Runnable, MessageReceiver {
             LOG.info("LocalCommand: " + msg);
         } else {
             LOG.info("RemoteMessage: " + msg);
+
+            // Record this message as part of channel state
+            // if appropriate. (non-marker messages)
+            if (!(msg instanceof SnapshotMessage.SnapshotMarkerMsg)) {
+                snapshotRecorder.maybeRecordChannelMessage(msg);
+            }
         }
         switch (msg) {
+            case SnapshotMessage snapshotMessage -> {
+                switch (snapshotMessage) {
+                    case SnapshotMessage.SnapshotMarkerMsg m -> snapshotRecorder.handleSnapshotMarker(m);
+                    case SnapshotMessage.ReqSnapshotMsg m -> {
+                        // Only the configured initiator should react by starting a snapshot
+                        if (id == m.getRecipient()) {
+                            LOG.info("Site " + id + " received ReqSnapshotMsg from site "
+                                    + m.getSender() + " and will start a snapshot.");
+                            snapshotRecorder.startSnapshot();
+                        } else {
+                            LOG.info("Site " + id + " received ReqSnapshotMsg not intended for it; ignoring.");
+                        }
+                    }
+                }
+            }
             case ResourceMessage resourceMessage -> {
                 switch (resourceMessage) {
                     case ResourceMessage.ReqResourceLockMsg m -> resourceManager.handleReqLockResourceMsg(m);
@@ -69,6 +103,7 @@ public class Site implements Runnable, MessageReceiver {
                     case LocalMessage.ReqResourceLockMsg m -> resourceManager.requestResource(m.getResourceId());
                     case LocalMessage.ReqReleaseResourceMsg m -> resourceManager.releaseResource(m.getResourceId());
                     case LocalMessage.PrintStatusMsg _ -> resourceManager.printStatus();
+                    case LocalMessage.ReqSnapshotMsg _ -> snapshotRecorder.startSnapshot();
                     case LocalMessage.ExitMsg _ -> System.exit(0);
                 }
             }
